@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  serviciosuscripcion:
+    build:
+      context: ./suscripciones
+    container_name: cSubs
+    working_dir: /app
+    command: java -jar /app/app.jar
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5506
+      - DB_NAME=EP3_OBS_SUBS
+      - DB_PASSWORD=
+      - DB_USER=root
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - monitoring-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3  
+
+  #  ------- LOKI -------
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    networks:
+      - monitoring-net
+
+  #  ------- PROMTAIL -------
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: promtail
+    volumes:
+      - ./logs:/var/log/app
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - monitoring-net
+    depends_on:
+      - loki
+
+  #  ------- PROMETHEUS -------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      # Inyectamos nuestra configuración personalizada
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+    - monitoring-net
+
+  #  ------- GRAFANA -------  
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+    - "3000:3000"
+    depends_on:
+    - prometheus
+    networks:
+    - monitoring-net
+
+networks:
+  monitoring-net:
+    driver: bridge
