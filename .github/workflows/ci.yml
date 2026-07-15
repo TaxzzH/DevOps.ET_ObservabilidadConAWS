@@ -33,42 +33,22 @@ jobs:
         run: snyk test --severity-threshold=high --file=suscripciones/pom.xml
 
   # --------- DOCKERHUB ---------
-  build-and-push:
-    name: "Build Docker Image & Push"
+  levantar-docker:
     runs-on: ubuntu-latest
-    
-    steps:  
-      - name: "Checkout Code"
-        uses: actions/checkout@v4
+    needs: analisis-sonarcloud
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3 
 
-      - name: "Login to Docker Hub"
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN}}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
           
-      - name: "Set up Docker Buildx"
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container
-          
-      - name: "Extract Metadata"
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/suscripciones-api
-          tags: |
-            type=raw,value=latest
-            type=sha,value={{sha}}
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/rentcar-back:latest .
 
-      - name: "Build and Push Image"
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Push Docker image
 
-      - name: "Finalización Exitosa"
-        run: echo "🚀 Imagen subida a Docker Hub de forma segura tras pasar todas las pruebas."   
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/rentcar-back:latest
