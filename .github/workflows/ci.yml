@@ -30,7 +30,7 @@ jobs:
       - name: Snyk Test (Seguridad)
         env: 
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --severity-threshold=high --suscripciones/pom.xml
+        run: snyk test --severity-threshold=high --file=suscripciones/pom.xml
 
   # --------- DOCKERHUB ---------
   build-and-push:
