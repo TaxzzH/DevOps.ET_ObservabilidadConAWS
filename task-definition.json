@@ -1,0 +1,35 @@
+{
+  "family": "tarea-suscripciones",
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "networkMode": "bridge",
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "cSubs",
+      "image": "esto-se-reemplaza-automaticamente-en-github",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "DB_HOST", "value": "host.docker.internal" },
+        { "name": "DB_PORT", "value": "5506" },
+        { "name": "DB_NAME", "value": "EP3_OBS_SUBS" },
+        { "name": "DB_USER", "value": "root" },
+        { "name": "DB_PASSWORD", "value": "" }
+      ],
+      "command": [
+        "java",
+        "-jar",
+        "/app/app.jar"
+      ]
+    }
+  ]
+}   

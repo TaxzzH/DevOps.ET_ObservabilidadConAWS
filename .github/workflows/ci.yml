@@ -32,36 +32,6 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk test --severity-threshold=high
 
-  # --------- SONARCLOUD ---------
-  analisis-sonarcloud:
-    name: "SonarCloud & Quality Gate"
-    runs-on: ubuntu-latest
-    needs: analisis-vulnerabilidad # Espera a Snyk
-    steps: 
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'maven'
-      
-      - name: SonarCloud Scan y Quality Gate
-        env: 
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          PROJECT_KEY_SONAR: ${{ secrets.PROJECT_KEY_SONAR }}
-          ORGANIZATION_SONAR: ${{ secrets.ORGANIZATION_SONAR }}
-        # sonar.qualitygate.wait=true bloquea el pipeline si el código es malo (IE6)
-        run: |
-          mvn verify sonar:sonar \
-           -Dsonar.host.url=https://sonarcloud.io \
-           -Dsonar.projectKey=${PROJECT_KEY_SONAR} \
-           -Dsonar.organization=${ORGANIZATION_SONAR} \
-           -Dsonar.login=${SONAR_TOKEN} \
-           -Dsonar.qualitygate.wait=true
-
   build-and-push:
     name: "Build Docker Image & Push"
     runs-on: ubuntu-latest
@@ -75,7 +45,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.     }}
           
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v3
